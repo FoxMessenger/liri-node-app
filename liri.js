@@ -6,7 +6,9 @@ var twitterKeys = require('./keys');
 // this inquirer NPM is to get the list function
 var inquirer = require('inquirer');
 
+// ==============
 // SWITCH CASE 1: pull a series of tweets from my personal account
+// ==============
 var myTweets = {
 	check: "Twitter Check", // use this just to make sure this is working
 	// main twitter pull function
@@ -17,26 +19,97 @@ var myTweets = {
 		var params = {screen_name: 'mianmagugeti'};
 		keys.get('statuses/user_timeline', params, function(error, tweets, response) {
   			if (!error) {
-  				for (i = 1; i < 12; i++) {
+  				// running a for loop to get the first 10 tweets (+1 because the array starts at 0, and I wanted "i" to start at 1)
+  				for (i = 1; i < 22; i++) {
+  				// print to the screen the information. "\n" creates a line break
   				console.log("\n" + i + ": " + tweets[i].text + "\n");
-  			}
-  			}
-  			
-		})
+  				} // --- END for loop
+  			} // --- END if not err
+		}) // --- END keys.get
+	} // --- END tweets function()
+}; // --- END myTweets object
+
+
+
+
+
+// ==============
+// SWITCH CASE 2: use the broken Spotify NPM to choose a SONG
+// ==============
+var spotifyThisSong = {
+	// prompt the user to input a song
+	prompt: function() {
+		inquirer.prompt([
+			{
+				type: "input",
+				message: "Type in a song: ",
+				name: "song"
+			} // --- END inquire.prompt
+		]).then( function(user) {
+			// so the spotify API has VERY LITTLE documentation. I'm not even sure I understood everything.
+			// once a song is input we want to run the function songSearch
+			var spotify = require('spotify');
+
+			// take the input of, in the case you get nothing you will default as Ace of Base
+			var userSong = user.song || "Ace of Base";
+			// now, the actual search.
+			spotify.search({ type: 'track', query: ('"' + userSong + '"')}, function(err, data) {
+			    if ( err ) {
+			        console.log('Error occurred: ' + err);
+			        return;
+			    }	
+
+			   	// this is the longest set of arrays and objects I've ever had to dig through.
+			    var name = data.tracks.items[1].artists[0].name;
+			    var songName = data.tracks.items[0].name;
+			    var previewLink = data.tracks.items[0].external_urls.spotify;
+			    var album = data.tracks.items[0].album.name 
+
+			    	console.log(JSON.stringify('artist/band: ' + name));
+				    console.log(JSON.stringify('song title: ' + songName));
+				    console.log(JSON.stringify('album title ' + album));
+				    console.log(JSON.stringify('preview link: ' + previewLink));
+
+			}); // --- END songSearch function
+		}) // --- END promise
+	}, // --- END spotifyThisSong.prompt	
+} // --- END spotifyThisSong object
+
+
+
+
+// ==============
+// SWITCH CASE 3: find a movie using OMDB
+// ==============
+var movieThis = {	
+	
+	check: console.log("give me a movie."),
+	prompt: function() {
+
+		inquirer.prompt([
+			{
+				type: "input",
+				message: "Type in a movie: ",
+				name: "movie"
+			} // --- END inquire.prompt
+		]).then(function(user) {
+
+			var request = require('request');
+			request('http://www.omdbapi.com/?t=' + user.movie, function (error, response, body) {
+				console.log("http://www.omdb.com/?t=" + user.movie)
+  				console.log('error:', error); // Print the error if one occurred 
+  				console.log("response: " + JSON.stringify(response)); // && response.statusCode // Print the response status code if a response was received 
+  				console.log("body: " + JSON.stringify(body));
+			});
+		});
 	}
 };
 
-// use the broken Spotify NPM to choose SONG
-var spotifyThisSong = function (){
-	console.log("information");
-};
-
-var movieThis = function (){
-	console.log("information");
-};
-
+// ==============
+// SWITCH CASE 4: use the broken Spotify NPM to choose SONG
+// ==============
 var doWhatItSays = function (){
-	console.log("information");
+	console.log("what does the fox say?");
 };
 
 inquirer.prompt([
@@ -48,7 +121,9 @@ inquirer.prompt([
 		
 	}
 ]).then(function(user) {
+	
 	console.log("choice is: " + user.options);
+	
 	switch(user.options) {
 		case "my-tweets":
 		// run the function tweets of myTweets
@@ -56,15 +131,15 @@ inquirer.prompt([
 		break;
 
 		case "spotify-this-song":
-		console.log("soptify");
+		spotifyThisSong.prompt();
 		break;
 
 		case "movie-this":
-		console.log("movies");
+		movieThis.prompt();
 		break;
 
 		case "do-what-it-says":
-		console.log("say something");
+		doWhatItSays();
 		break;
 	}
 });
