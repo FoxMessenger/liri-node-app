@@ -5,6 +5,16 @@
 var twitterKeys = require('./keys');
 // this inquirer NPM is to get the list function
 var inquirer = require('inquirer');
+// filesystem API
+var fs = require('fs')
+// using the fs to store the information in a text file
+var fileStore = function(dataType){
+	fs.appendFile('log.txt', JSON.stringify(dataType, null, 2), (err) => {
+						if (!err) {
+							console.log('New Info has been logged!');
+						}
+					});	
+}
 
 // ==============
 // SWITCH CASE 1: pull a series of tweets from my personal account
@@ -30,11 +40,11 @@ var myTweets = {
 
   					console.log(JSON.stringify(tweets[i].text, null, 2) + '\n');
   					
-  				}
-
-  				// console.log('\n' + i + ': ' + tweets[i].text + '\n');
-  				// } // --- END for loop
+  					fileStore(tweets[i].text);
+  				} // } // --- END for loop
+			
   			} // --- END if not err
+
 		}) // --- END keys.get
 	} // --- END tweets function()
 }; // --- END myTweets object
@@ -69,17 +79,23 @@ var spotifyThisSong = {
 			        return;
 			    }	
 
-			   	// this is the longest set of arrays and objects I've ever had to dig through.
-			    var name = data.tracks.items[1].artists[0].name;
-			    var songName = data.tracks.items[0].name;
-			    var previewLink = data.tracks.items[0].external_urls.spotify;
-			    var album = data.tracks.items[0].album.name 
+				printInfo = function(){
+
+					// this is the longest set of arrays and objects I've ever had to dig through.
+				    var name = data.tracks.items[1].artists[0].name;
+				    var songName = data.tracks.items[0].name;
+				    var previewLink = data.tracks.items[0].external_urls.spotify;
+				    var album = data.tracks.items[0].album.name 
 
 			    	console.log(JSON.stringify('artist/band: ' + name));
 				    console.log(JSON.stringify('song title: ' + songName));
 				    console.log(JSON.stringify('album title ' + album));
 				    console.log(JSON.stringify('preview link: ' + previewLink));
+				}
+    			
+    			printInfo();
 
+    			fileStore(data);
 			}); // --- END songSearch function
 		}) // --- END promise
 	}, // --- END spotifyThisSong.prompt	
@@ -97,18 +113,24 @@ var spotifyThisSong = {
 			        console.log('Error occurred: ' + err);
 			        return;
 			    }	
-			    // console.log(data)
-			   	// this is the longest set of arrays and objects I've ever had to dig through.
-			    var name = data.tracks.items[1].artists[0].name;
-			    var songName = data.tracks.items[0].name;
-			    var previewLink = data.tracks.items[0].external_urls.spotify;
-			    var album = data.tracks.items[0].album.name 
+			 	printInfo = function(){
 
-		    	console.log(JSON.stringify('artist/band: ' + name));
-			    console.log(JSON.stringify('song title: ' + songName));
-			    console.log(JSON.stringify('album title ' + album));
-			    console.log(JSON.stringify('preview link: ' + previewLink));
+			 					    // console.log(data)
+				   	// this is the longest set of arrays and objects I've ever had to dig through.
+				    var name = data.tracks.items[1].artists[0].name;
+				    var songName = data.tracks.items[0].name;
+				    var previewLink = data.tracks.items[0].external_urls.spotify;
+				    var album = data.tracks.items[0].album.name 
+				    
+			    	console.log(JSON.stringify('artist/band: ' + name));
+				    console.log(JSON.stringify('song title: ' + songName));
+				    console.log(JSON.stringify('album title ' + album));
+				    console.log(JSON.stringify('preview link: ' + previewLink));
+				}
 
+				printInfo();
+
+			    fileStore(printInfo());
 			}); // --- END songSearch function
 	}, // --- END spotifyThisSong.justRequest
 } // --- END spotifyThisSong object
@@ -147,7 +169,6 @@ var movieThis = {
 // SWITCH CASE 4: use the broken Spotify NPM to choose SONG
 // ==============
 var doWhatItSays = function (){
-	var fs = require('fs')
 
 	fs.readFile("random.txt", "utf8", function(error, data) {
   		spotifyThisSong.justRequest(data);
